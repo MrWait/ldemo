@@ -19,6 +19,79 @@
         "foo" 88
         42 false})
 
+(defn looptest1 []
+  (loop
+      [x 5]
+    (if (neg? x)
+      x
+      (recur (dec x)))))
+
+(defn countdown
+  [x]
+  (if (zero? x)
+    :blastoff!
+    (do (println x)
+        (recur (dec x)))))
+
+(defn embedded-repl
+  "a naive Clojure REPL implementation. Enter ':quit' to exit"
+  []
+  (print (str (ns-name *ns*) ">>> "))
+  (flush)
+  (let [expr (read)
+        value (eval expr)]
+    (when (not= :quit value)
+      (println value)
+      (recur))))
+
+(defn reducetest1
+  []
+  (reduce (fn [m v]
+            (assoc m v (* v v)))
+          {}
+          [1 2 3 4]))
+
+(def only-strings (partial filter string?))
+
+(defn nageted-sum-str1
+  [& numbers]
+  (str (- (apply + numbers))))
+
+(def nageted-sum-str (comp str - +))
+
+(require '[clojure.string :as str])
+
+(def camel->keyword1 (comp keyword
+                           str/join
+                           (partial interpose \-)
+                           (partial map str/lower-case)
+                           #(str/split % #"(?<=[a-z])(?=[A-Z])")))
+
+(defn camel->keyword
+  [s]
+  (->> (str/split s #"(?<=[a-z])(?=[A-Z])")
+       (map str/lower-case)
+       (interpose \-)
+       str/join
+       keyword))
+
+
+(def camel-pairs->map (comp (partial apply hash-map)
+                            (partial map-indexed (fn [i x]
+                                                   (if (odd? i)
+                                                     x
+                                                     (camel->keyword x))))))
+
+(defn adder
+  [n]
+  (fn [x] (+ n x)))
+
+(defn doubler
+  [f]
+  (fn [& args]
+    (* 2 (apply f args))))
+
+(def doubler-+ (doubler +))
 (defn print-logger
   [writer]
   #(binding [*out* writer]
